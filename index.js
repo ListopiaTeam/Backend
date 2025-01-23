@@ -9,8 +9,25 @@ const url = `https://api.rawg.io/api/games/3498/screenshots?key=${apiKey}`;
 
 
 
-// Update the getGames function to return the fetched data
-async function getGames(url) {
+
+async function getGames() {
+  const url = "https://api.rawg.io/api/games?key=" + apiKey;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+    const json = await response.json();
+    return json; // Return the JSON data
+  } catch (error) {
+    console.error(error.message);
+    throw error; // Rethrow the error so it can be handled by the caller
+  }
+}
+
+async function getGame(id) {
+  const url = `https://api.rawg.io/api/games/${id}?key=${apiKey}`;
+
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -26,10 +43,21 @@ async function getGames(url) {
 
 app.get('/getGames', async (req, res) => {
   try {
-    const games = await getGames(url); // Await the data from getGames
-    res.json(games); // Send the JSON response to the client
+    const games = await getGames(); 
+    res.json(games);
   } catch (error) {
-    res.status(500).send({ error: error.message }); // Handle errors and send an error response
+    res.status(500).send({ error: error.message });
+    console.error(error);
+  }
+});
+
+app.get('/getGame/:id', async (req, res) => {
+  let id =req.params.id
+  try {
+    const game = await getGame(id); 
+    res.json(game);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
     console.error(error);
   }
 });
