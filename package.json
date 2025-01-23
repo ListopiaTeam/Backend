@@ -2,9 +2,8 @@
   "name": "backend",
   "module": "index.js",
   "type": "module",
-  
   "scripts": {
-    "dev":"bun --watch index.js"
+    "dev": "bun --watch index.js"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -13,6 +12,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "cloudinary": "^2.5.1",
     "express": "^4.21.2"
   }
 }

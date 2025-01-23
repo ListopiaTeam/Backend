@@ -1,14 +1,10 @@
 const express = require('express');
+import { removeFromCloud } from "./cloudinaryConfig.js";
 const app = express();
 app.use(express.json());
 const port = 3000;
 
 const apiKey = process.env.RAWG_API_KEY;
-const url1 = "https://api.rawg.io/api/games?key=" + apiKey;
-const url = `https://api.rawg.io/api/games/3498/screenshots?key=${apiKey}`;
-
-
-
 
 async function getGames() {
   const url = "https://api.rawg.io/api/games?key=" + apiKey;
@@ -40,6 +36,16 @@ async function getGame(id) {
     throw error; // Rethrow the error so it can be handled by the caller
   }
 }
+
+app.delete("/list/:id", async (req, resp) => {
+  try {
+    const { id } = req.params;
+    removeFromCloud(id);
+    resp.json({ msg: "Successfull deletion" });
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 app.get('/getGames', async (req, res) => {
   try {
