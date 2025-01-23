@@ -1,9 +1,10 @@
-const express = require('express');
 import { removeFromCloud } from "./cloudinaryConfig.js";
+
+const express = require('express');
 const app = express();
 app.use(express.json());
-const port = 3000;
 
+const port = 3000;
 const apiKey = process.env.RAWG_API_KEY;
 
 async function getGames() {
@@ -14,26 +15,25 @@ async function getGames() {
       throw new Error(`Response status: ${response.status}`);
     }
     const json = await response.json();
-    return json; // Return the JSON data
+    return json;
   } catch (error) {
     console.error(error.message);
-    throw error; // Rethrow the error so it can be handled by the caller
+    throw error;
   }
 }
 
 async function getGame(id) {
   const url = `https://api.rawg.io/api/games/${id}?key=${apiKey}`;
-
   try {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }
     const json = await response.json();
-    return json; // Return the JSON data
+    return json;
   } catch (error) {
     console.error(error.message);
-    throw error; // Rethrow the error so it can be handled by the caller
+    throw error;
   }
 }
 
@@ -69,5 +69,5 @@ app.get('/getGame/:id', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`app listening on port ${port}`);
+  console.log(`App listening on port ${port}`);
 });
