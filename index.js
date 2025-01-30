@@ -1,6 +1,8 @@
 const express = require('express');
+const cors = require('cors')
 import { removeFromCloud } from "./cloudinaryConfig.js";
 const app = express();
+app.use(cors())
 app.use(express.json());
 const port = 3000;
 
@@ -46,6 +48,9 @@ app.delete("/list/:id", async (req, resp) => {
     console.log(error);
   }
 });
+
+
+
 
 app.get('/getGames', async (req, res) => {
   try {
