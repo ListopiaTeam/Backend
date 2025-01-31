@@ -24,6 +24,22 @@ async function getGames() {
   }
 }
 
+async function searchGames(gameName) {
+const url=`https://api.rawg.io/api/games?key=${apiKey}&search=${gameName}`
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+    const json = await response.json();
+    return json;
+  } catch (error) {
+    console.error(error.message);
+    throw error;
+  }
+}
+
 async function getGame(id) {
   const url = `https://api.rawg.io/api/games/${id}?key=${apiKey}`;
   try {
@@ -63,6 +79,17 @@ app.get("/getGame/:id", async (req, res) => {
   let id = req.params.id;
   try {
     const game = await getGame(id);
+    res.json(game);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+    console.error(error);
+  }
+});
+
+app.get("/searchGame/:gameName", async (req, res) => {
+  let gameName = req.params.gameName;
+  try {
+    const game = await searchGames(gameName);
     res.json(game);
   } catch (error) {
     res.status(500).send({ error: error.message });
