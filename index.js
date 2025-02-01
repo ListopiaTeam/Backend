@@ -25,7 +25,9 @@ async function getGames() {
 }
 
 async function searchGames(gameName,query) {
-const url=`https://api.rawg.io/api/games?key=${apiKey}&search=${gameName}&ordering=${query}`
+const url=`https://api.rawg.io/api/games?key=${apiKey}&search=${gameName}&ordering=-${query}&search_exact=true`
+
+console.log("Fetching URL:", url); 
 
   try {
     const response = await fetch(url);
@@ -88,7 +90,9 @@ app.get("/getGame/:id", async (req, res) => {
 
 app.get("/searchGame/:gameName", async (req, res) => {
   let gameName = req.params.gameName;
-  let ordering = req.query.ordering || "-rating"; 
+  let ordering = req.query.ordering || "rating"; 
+  console.log(ordering);
+  
   try {
     const game = await searchGames(gameName,ordering);
     res.json(game);
