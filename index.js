@@ -24,8 +24,25 @@ async function getGames() {
   }
 }
 
+async function getGenres() {
+  const url = "https://api.rawg.io/api/genres?key=" + apiKey;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+    const json = await response.json();
+    return json;
+  } catch (error) {
+    console.error(error.message);
+    throw error;
+  }
+}
+
+
+
 async function searchGames(gameName,query) {
-const url=`https://api.rawg.io/api/games?key=${apiKey}&search=${gameName}&ordering=-${query}&search_exact=true`
+const url=`https://api.rawg.io/api/games?key=${apiKey}&search=${gameName}&ordering=-${query}&search_precise=true`
 
 console.log("Fetching URL:", url); 
 
@@ -41,6 +58,8 @@ console.log("Fetching URL:", url);
     throw error;
   }
 }
+
+
 
 async function getGame(id) {
   const url = `https://api.rawg.io/api/games/${id}?key=${apiKey}`;
@@ -77,6 +96,16 @@ app.get("/getGames", async (req, res) => {
   }
 });
 
+app.get("/getGenres", async (req, res) => {
+  try {
+    const games = await getGenres();
+    res.json(games);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+    console.error(error);
+  }
+});
+
 app.get("/getGame/:id", async (req, res) => {
   let id = req.params.id;
   try {
@@ -101,6 +130,8 @@ app.get("/searchGame/:gameName", async (req, res) => {
     console.error(error);
   }
 });
+
+
 
 app.listen(port, () => {
   console.log(`App listening on port ${port}`);
