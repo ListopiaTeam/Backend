@@ -39,12 +39,9 @@ async function getGenres() {
   }
 }
 
-
-
 async function searchGames(gameName,query) {
-const url=`https://api.rawg.io/api/games?key=${apiKey}&search=${gameName}&ordering=-${query}&search_precise=true`
-
-console.log("Fetching URL:", url); 
+  const url=`https://api.rawg.io/api/games?key=${apiKey}&search=${gameName}&ordering=-${query}&search_precise=true`
+  console.log("Fetching URL:", url); 
 
   try {
     const response = await fetch(url);
@@ -58,8 +55,6 @@ console.log("Fetching URL:", url);
     throw error;
   }
 }
-
-
 
 async function getGame(id) {
   const url = `https://api.rawg.io/api/games/${id}?key=${apiKey}`;
@@ -131,7 +126,9 @@ app.get("/searchGame/:gameName", async (req, res) => {
   }
 });
 
-
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
 app.listen(port, () => {
   console.log(`App listening on port ${port}`);
