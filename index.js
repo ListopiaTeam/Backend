@@ -3,6 +3,11 @@ import { removeFromCloud } from "./cloudinaryConfig.js";
 const express = require("express");
 const cors = require("cors");
 const app = express();
+const admin = require("firebase-admin");
+
+admin.initializeApp({
+  credential: admin.credential.cert(require("./FirebaseAPI.json")),
+});
 app.use(cors());
 app.use(express.json());
 
@@ -39,9 +44,9 @@ async function getGenres() {
   }
 }
 
-async function searchGames(gameName,query) {
-  const url=`https://api.rawg.io/api/games?key=${apiKey}&search=${gameName}&ordering=-${query}&search_precise=true`
-  console.log("Fetching URL:", url); 
+async function searchGames(gameName, query) {
+  const url = `https://api.rawg.io/api/games?key=${apiKey}&search=${gameName}&ordering=-${query}&search_precise=true`;
+  console.log("Fetching URL:", url);
 
   try {
     const response = await fetch(url);
@@ -114,11 +119,11 @@ app.get("/getGame/:id", async (req, res) => {
 
 app.get("/searchGame/:gameName", async (req, res) => {
   let gameName = req.params.gameName;
-  let ordering = req.query.ordering || "rating"; 
+  let ordering = req.query.ordering || "rating";
   console.log(ordering);
-  
+
   try {
-    const game = await searchGames(gameName,ordering);
+    const game = await searchGames(gameName, ordering);
     res.json(game);
   } catch (error) {
     res.status(500).send({ error: error.message });
@@ -128,6 +133,19 @@ app.get("/searchGame/:gameName", async (req, res) => {
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
+});
+
+app.delete("/deleteUser/:uid", async (req, res) => {
+  const { uid } = req.params;
+
+  try {
+    await admin.auth().deleteUser(uid);
+    res
+      .status(200)
+      .json({ message: `User with UID ${uid} deleted successfully.` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.listen(port, () => {
