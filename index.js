@@ -45,7 +45,7 @@ async function deactivateExpiredEvents() {
 
 async function startDeactivationCycle() {
   await deactivateExpiredEvents();
-  setTimeout(startDeactivationCycle, 10 * 1000); // Schedule next run only after completion
+  setTimeout(startDeactivationCycle, 12 * 60 * 60 * 1000); // Schedule next run only after completion
 }
 
 startDeactivationCycle();
