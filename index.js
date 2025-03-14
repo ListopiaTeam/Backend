@@ -1,5 +1,4 @@
 import { removeFromCloud } from "./cloudinaryConfig.js";
-
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -8,12 +7,47 @@ const admin = require("firebase-admin");
 admin.initializeApp({
   credential: admin.credential.cert(require("./FirebaseAPI.json")),
 });
+
+const db = admin.firestore();
 app.use(cors());
 app.use(express.json());
 
 const port = process.env.PORT || 3000;
 const apiKey = process.env.RAWG_API_KEY;
 
+// Function to deactivate expired events
+async function deactivateExpiredEvents() {
+  const now = admin.firestore.Timestamp.now();
+
+  try {
+    const snapshot = await db.collection("Events")
+      .where("isActive", "==", true)
+      .where("endDate", "<=", now)
+      .get();
+
+    if (snapshot.empty) {
+      console.log("No expired events found.");
+      return;
+    }
+
+    const batch = db.batch();
+
+    snapshot.forEach(doc => {
+      batch.update(doc.ref, { isActive: false });
+    });
+
+    await batch.commit();
+    console.log(`Updated ${snapshot.size} expired events.`);
+  } catch (error) {
+    console.error("Error updating events:", error);
+  }
+}
+
+// Run the function every 30 minutes (adjust as needed)
+setInterval(deactivateExpiredEvents, 24 * 60 * 60 * 1000);
+
+
+// RAWG API functions
 async function getGames() {
   const url = "https://api.rawg.io/api/games?key=" + apiKey;
   try {
@@ -21,8 +55,7 @@ async function getGames() {
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }
-    const json = await response.json();
-    return json;
+    return await response.json();
   } catch (error) {
     console.error(error.message);
     throw error;
@@ -36,8 +69,7 @@ async function getGenres() {
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }
-    const json = await response.json();
-    return json;
+    return await response.json();
   } catch (error) {
     console.error(error.message);
     throw error;
@@ -53,8 +85,7 @@ async function searchGames(gameName, query) {
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }
-    const json = await response.json();
-    return json;
+    return await response.json();
   } catch (error) {
     console.error(error.message);
     throw error;
@@ -68,19 +99,19 @@ async function getGame(id) {
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }
-    const json = await response.json();
-    return json;
+    return await response.json();
   } catch (error) {
     console.error(error.message);
     throw error;
   }
 }
 
-app.delete("/list/:id", async (req, resp) => {
+// Express routes
+app.delete("/list/:id", async (req, res) => {
   try {
     const { id } = req.params;
     removeFromCloud(id);
-    resp.json({ msg: "Successfull deletion" });
+    res.json({ msg: "Successful deletion" });
   } catch (error) {
     console.log(error);
   }
@@ -98,8 +129,8 @@ app.get("/getGames", async (req, res) => {
 
 app.get("/getGenres", async (req, res) => {
   try {
-    const games = await getGenres();
-    res.json(games);
+    const genres = await getGenres();
+    res.json(genres);
   } catch (error) {
     res.status(500).send({ error: error.message });
     console.error(error);
@@ -140,14 +171,13 @@ app.delete("/deleteUser/:uid", async (req, res) => {
 
   try {
     await admin.auth().deleteUser(uid);
-    res
-      .status(200)
-      .json({ message: `User with UID ${uid} deleted successfully.` });
+    res.status(200).json({ message: `User with UID ${uid} deleted successfully.` });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
+// Start the Express server
 app.listen(port, () => {
   console.log(`App listening on port ${port}`);
 });
