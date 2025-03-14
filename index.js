@@ -43,9 +43,12 @@ async function deactivateExpiredEvents() {
   }
 }
 
-// Run the function every 30 minutes (adjust as needed)
-setInterval(deactivateExpiredEvents, 24 * 60 * 60 * 1000);
+async function startDeactivationCycle() {
+  await deactivateExpiredEvents();
+  setTimeout(startDeactivationCycle, 10 * 1000); // Schedule next run only after completion
+}
 
+startDeactivationCycle();
 
 // RAWG API functions
 async function getGames() {
