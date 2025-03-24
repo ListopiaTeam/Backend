@@ -9,8 +9,20 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
+
 // Security could be further improved with additional checks (eg. Firebase Auth Middleware / API Key Verification)
-app.use(cors({origin:"https://listopia-frontend.netlify.app"}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || origin === "https://listopia-frontend.netlify.app" || origin.startsWith("http://localhost")) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
+
 app.use(express.json());
 
 const port = process.env.PORT || 3000;
