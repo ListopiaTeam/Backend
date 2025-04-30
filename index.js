@@ -14,13 +14,17 @@ const db = admin.firestore();
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || origin === "https://listopia-frontend.netlify.app" || origin.startsWith("http://localhost")) {
+      if (
+        !origin ||
+        origin === "https://listopia-frontend.netlify.app" ||
+        origin.startsWith("http://localhost")
+      ) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
     },
-  })
+  }),
 );
 
 app.use(express.json());
@@ -33,7 +37,8 @@ async function deactivateExpiredEvents() {
   const now = admin.firestore.Timestamp.now();
 
   try {
-    const snapshot = await db.collection("Events")
+    const snapshot = await db
+      .collection("Events")
       .where("isActive", "==", true)
       .where("endDate", "<=", now)
       .get();
@@ -45,7 +50,7 @@ async function deactivateExpiredEvents() {
 
     const batch = db.batch();
 
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc) => {
       batch.update(doc.ref, { isActive: false });
     });
 
@@ -187,7 +192,9 @@ app.delete("/deleteUser/:uid", async (req, res) => {
 
   try {
     await admin.auth().deleteUser(uid);
-    res.status(200).json({ message: `User with UID ${uid} deleted successfully.` });
+    res
+      .status(200)
+      .json({ message: `User with UID ${uid} deleted successfully.` });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
